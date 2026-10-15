@@ -1,0 +1,10 @@
+export const CATEGORY:Record<string,string>={market:'市场走势与政策',leasing:'租赁成交与租户动态',investment:'买卖成交与投资动态',supply:'新增供应与项目更新'};
+export const IMPACT:Record<string,{label:string,symbol:string}>={positive:{label:'潜在利好',symbol:'↑'},negative:{label:'潜在利空',symbol:'↓'},mixed:{label:'影响分化',symbol:'↕'},neutral:{label:'方向待定',symbol:'↔'}};
+export function number(value:unknown,digits=1):string{return typeof value==='number'&&Number.isFinite(value)?value.toLocaleString('en-US',{maximumFractionDigits:digits,minimumFractionDigits:digits}):'—';}
+export function latest(series:any){return (series?.points||[]).filter((p:any)=>p.value!=null&&Number.isFinite(p.value)).at(-1);}
+export function change(series:any,n=1){const ps=series?.points||[];const a=ps.at(-1),b=ps.at(-1-n);if(!a||a.value==null||!b||b.value==null||b.value===0)return null;return(a.value/b.value-1)*100;}
+export function csvCell(value:unknown):string{let s=value==null?'':String(value);if(/^[=+@\-\t\r]/.test(s))s="'"+s;return'"'+s.replaceAll('"','""')+'"';}
+export function download(name:string,content:string|Blob,type='text/plain;charset=utf-8'){const b=content instanceof Blob?content:new Blob([content],{type});const url=URL.createObjectURL(b);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+export function exportSeries(series:any){download(series.id+'.csv','\uFEFF'+[['观察期','数值','单位','来源','面积口径','临时数字','原始链接'],...series.points.map((p:any)=>[p.period,p.value,series.unit,series.provider,series.areaBasis,p.provisional?'是':'否',series.sourceUrl])].map(r=>r.map(csvCell).join(',')).join('\r\n'),'text/csv;charset=utf-8');}
+export function displayDate(s:unknown){if(typeof s!=='string'||!s)return'未记录';const d=new Date(s);return Number.isNaN(d.getTime())?s:d.toLocaleString('zh-CN',{timeZone:'Asia/Hong_Kong',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});}
+export function safeUrl(s:unknown){return typeof s==='string'&&/^https?:\/\//.test(s)?s:undefined;}
